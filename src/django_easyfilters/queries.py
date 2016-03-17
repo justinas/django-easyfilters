@@ -1,6 +1,6 @@
 from django import VERSION
 from django.db import models
-from django.db.backends.util import typecast_timestamp
+from django.db.backends.utils import typecast_timestamp
 from django.db.models.sql.compiler import SQLCompiler
 from django.db.models.sql.constants import MULTI
 try:
@@ -8,7 +8,7 @@ try:
 except ImportError:
     from django.db.models.expressions import Date
 from django.db.models.sql.subqueries import AggregateQuery
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 
 
 # Some fairly brittle, low level stuff, to get the aggregation
@@ -89,14 +89,14 @@ def value_counts(qs, fieldname):
     """
     Performs a simple query returning the count of each value of
     the field 'fieldname' in the QuerySet, returning the results
-    as a SortedDict of value: count
+    as a OrderedDict of value: count
     """
     values_counts = qs.filter(**{
         fieldname+"__isnull": False
     }).values_list(fieldname)\
         .order_by(fieldname)\
         .annotate(models.Count(fieldname))
-    count_dict = SortedDict()
+    count_dict = OrderedDict()
     null_count = qs.filter(**{fieldname+"__isnull": True}).count()
     if null_count:
         count_dict[None] = null_count
@@ -180,7 +180,7 @@ def numeric_range_counts(qs, fieldname, ranges):
     agg_query.add_subquery(query, qs.db)
     results = agg_query.get_counts(qs.db)
 
-    count_dict = SortedDict()
+    count_dict = OrderedDict()
     for val, count in results:
         try:
             r = ranges[val]

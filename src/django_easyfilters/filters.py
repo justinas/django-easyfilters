@@ -271,7 +271,7 @@ class SimpleQueryMixin(object):
     """
     def get_values_counts(self, qs):
         """
-        Returns a SortedDict dictionary of {value: count}.
+        Returns a OrderedDict dictionary of {value: count}.
 
         The order is the underlying order produced by sorting ascending on the
         DB field.
