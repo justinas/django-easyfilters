@@ -27,12 +27,12 @@ def get_model_field(model, f):
     parts = f.split(LOOKUP_SEP)
     opts = model._meta
     for name in parts[:-1]:
-        rel = opts.get_field_by_name(name)[0]
+        rel = opts.get_field(name)
         if isinstance(rel, RelatedObject):
             model = rel.model
             opts = rel.opts
         else:
             model = rel.rel.to
             opts = model._meta
-    rel, model, direct, m2m = opts.get_field_by_name(parts[-1])
-    return rel, m2m
+    rel = opts.get_field(parts[-1])
+    return rel, rel.many_to_many
