@@ -115,6 +115,7 @@ class NumericAggregateQuery(AggregateQuery):
 
 
 class NumericAggregateCompiler(SQLCompiler):
+    col_count = 2
     def results_iter(self):
         for rows in self.execute_sql(MULTI):
             for row in rows:
@@ -133,7 +134,7 @@ class NumericAggregateCompiler(SQLCompiler):
 
 
 class NumericValueRange(object):
-    alias = 'easyfilter_number_range_alias'
+    alias = 'Col1'
 
     def __init__(self, col, ranges):
         # ranges is list of (lower, upper) bounds we want to find, where 'lower'
@@ -156,8 +157,7 @@ class NumericValueRange(object):
                    for i, val in enumerate(self.ranges)] +
                   # An inclusive lower limit for the first item in ranges:
                   ['WHEN %s = %s THEN 0 ' % (col, self.ranges[0][0])] +
-                  ['ELSE %s END ' % len(self.ranges)] +
-                  ['as %s' % self.alias])
+                  ['ELSE %s END ' % len(self.ranges)])
         if VERSION >= (1, 6):
             return ''.join(clause), ()
         else:
@@ -165,10 +165,12 @@ class NumericValueRange(object):
 
 
 def numeric_range_counts(qs, fieldname, ranges):
-
     # Build the query:
     query = qs.values_list(fieldname).query.clone()
-    if VERSION >= (1, 6):
+    if VERSION >= (1, 8):
+        col = query.select[0]
+        query.select[0] = NumericValueRange((col.alias, col.field.column), ranges)
+    elif VERSION >= (1, 6):
         col, field = query.select[0]
         query.select[0] = NumericValueRange(col, ranges), field
     else:
