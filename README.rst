@@ -21,6 +21,9 @@ django-easyfilters
 Overview
 ========
 
+**Fork with added hacks to "fix" my problems.
+Do not use unless you're fine with the code breaking in unexpected ways**
+
 This library provides filters similar in some ways to ``list_filter`` and
 ``date_hierarchy`` in Django's admin, but for use outside the
 admin. Importantly, it also includes result counts for the choices. It is
