@@ -146,7 +146,7 @@ class NumericValueRange(object):
 
     def as_sql(self, qn, connection):
         if isinstance(self.col, (list, tuple)):
-            col = '%s.%s' % tuple([qn(c) for c in self.col])
+            col = '%s.%s' % tuple([qn.quote_name_unless_alias(c) for c in self.col])
         else:
             col = self.col
 
