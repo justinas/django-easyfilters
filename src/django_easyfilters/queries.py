@@ -25,6 +25,7 @@ class DateAggregateQuery(AggregateQuery):
 
 
 class DateAggregateCompiler(SQLCompiler):
+    has_extra_select = False
     def results_iter(self):
         needs_string_cast = self.connection.features.needs_datetime_string_cast
 
@@ -116,6 +117,7 @@ class NumericAggregateQuery(AggregateQuery):
 
 class NumericAggregateCompiler(SQLCompiler):
     col_count = 2
+    has_extra_select = False
     def results_iter(self):
         for rows in self.execute_sql(MULTI):
             for row in rows:
@@ -167,7 +169,12 @@ class NumericValueRange(object):
 def numeric_range_counts(qs, fieldname, ranges):
     # Build the query:
     query = qs.values_list(fieldname).query.clone()
-    if VERSION >= (1, 8):
+    if VERSION >= (2, 0):
+        col = query.select[0]
+        tmp = list(query.select)
+        tmp[0] = NumericValueRange((col.alias, col.field.column), ranges)
+        query.select = tuple(tmp)
+    elif VERSION >= (1, 8):
         col = query.select[0]
         query.select[0] = NumericValueRange((col.alias, col.field.column), ranges)
     elif VERSION >= (1, 6):

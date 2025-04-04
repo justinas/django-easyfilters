@@ -105,7 +105,7 @@ class FilterSet(object):
 
     def get_filter_for_field(self, field):
         f, m2m = get_model_field(self.model, field)
-        if f.rel is not None:
+        if getattr(f, "rel", None) is not None:
             if m2m:
                 return ManyToManyFilter
             else:

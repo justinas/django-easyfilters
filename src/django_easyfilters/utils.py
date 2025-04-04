@@ -32,7 +32,7 @@ def get_model_field(model, f):
             model = rel.model
             opts = rel.opts
         else:
-            model = rel.rel.to
+            model = rel.related_model
             opts = model._meta
     rel = opts.get_field(parts[-1])
     return rel, rel.many_to_many
