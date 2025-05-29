@@ -45,7 +45,7 @@ class DateAggregateCompiler(SQLCompiler):
                'ORDER BY (%s)'
                % (DateWithAlias.alias, DateWithAlias.alias, self.query.subquery,
                   DateWithAlias.alias, DateWithAlias.alias))
-        params = self.query.sub_params
+        params = self.get_compiler(self.using).as_sql(with_col_aliases=True)
         return (sql, params)
 
 
@@ -124,14 +124,14 @@ class NumericAggregateCompiler(SQLCompiler):
                 yield row
 
     def as_sql(self, qn=None):
+        inner_query, params = self.query.inner_query.get_compiler(self.using).as_sql(with_col_aliases=True)
         sql = ('SELECT %s, COUNT(%s) '
                'FROM (%s) subquery '
                'GROUP BY (%s) '
                'ORDER BY (%s)'
                % (NumericValueRange.alias, NumericValueRange.alias,
-                  self.query.subquery, NumericValueRange.alias,
+                  inner_query, NumericValueRange.alias,
                   NumericValueRange.alias))
-        params = self.query.sub_params
         return (sql, params)
 
 
@@ -185,8 +185,7 @@ def numeric_range_counts(qs, fieldname, ranges):
     else:
         query.select[0] = NumericValueRange(query.select[0], ranges)
 
-    agg_query = NumericAggregateQuery(qs.model)
-    agg_query.add_subquery(query, qs.db)
+    agg_query = NumericAggregateQuery(qs.model, query)
     results = agg_query.get_counts(qs.db)
 
     count_dict = OrderedDict()
