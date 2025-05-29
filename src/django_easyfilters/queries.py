@@ -165,6 +165,8 @@ class NumericValueRange(object):
         else:
             return ''.join(clause)
 
+    def select_format(self, compiler, sql, params):
+        return sql, params
 
 def numeric_range_counts(qs, fieldname, ranges):
     # Build the query:
